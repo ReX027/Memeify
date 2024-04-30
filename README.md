@@ -36,7 +36,7 @@ To get started with Memeify, follow these simple steps:
     npm start
     ```
 
-5. Open your browser and visit `http://localhost:3000` to access Memeify.
+5. Open your browser and visit `http://localhost:5173` to access Memeify.
 
 ## How to Use
 
