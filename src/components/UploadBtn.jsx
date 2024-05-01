@@ -16,49 +16,54 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-export default function InputFileUpload() {
+export default function InputFileUpload({
+  handleDragStart,
+  handleUploadImages,
+}) {
   const [selectedImages, setSelectedImage] = useState([]);
   const handleChangeImage = (e) => {
     const files = Array.from(e.target.files);
-    console.log(e.target.files);
     console.log(files);
     setSelectedImage((prevImages) => [...prevImages, ...files]);
-    // if (files.length == 1) {
-    //   setSelectedImage([files[0]]);
-    //   console.log(selectedImages, "sss");
-    // } else {
-    //   setSelectedImage(files);
-    //   console.log(selectedImages, "aaa");
-    // }
+    handleUploadImages((prevImages) => [...prevImages, ...files]);
   };
+
   return (
     <>
-      <Button
-        component="label"
-        role={undefined}
-        variant="contained"
-        tabIndex={-1}
+      <div
+        className="upload mb-5 mt-8 p-4 flex"
         style={{ height: "100%", width: "15%" }}
-        startIcon={<CloudUploadIcon />}
-        //   onClick={handleUploadImage}
-        onChange={handleChangeImage}
       >
-        Upload file
-        <VisuallyHiddenInput type="file" accept="image/*" multiple />
-      </Button>
-      {/* <div className="container">selectedImage: {selectedImage}</div> */}
-      <div className="container grid grid-cols-3">
+        <Button
+          component="label"
+          role={undefined}
+          variant="contained"
+          tabIndex={-1}
+          startIcon={<CloudUploadIcon />}
+          //   onClick={handleUploadImage}
+          onChange={handleChangeImage}
+        >
+          Upload file
+          <VisuallyHiddenInput type="file" accept="image/*" multiple />
+        </Button>
+      </div>
+      <div className="container grid grid-cols-3 gap-4 mb-10">
         {selectedImages.map((img, index) => (
           <img
-            className="container"
+            className="container draggable"
             key={index}
             src={URL.createObjectURL(img)}
             alt={`Preview ${index + 1}`}
+            id={`${index}`}
             style={{
               maxWidth: "300px",
               maxHeight: "300px",
               margin: "5px",
+              cursor: "pointer",
             }}
+            draggable="true"
+            loading="lazy"
+            onDragStart={(event) => handleDragStart(event, `${index}`)}
           />
         ))}
       </div>

@@ -1,28 +1,32 @@
 import "./App.css";
 import { useState } from "react";
 import InputFileUpload from "./components/UploadBtn";
+import { useEffect } from "react";
 
 function App() {
   const [draggedOverZone, setDraggedOverZone] = useState(null);
   const [imagesInZones, setImagesInZones] = useState({});
-  // const [uploadImage, setUploadImage] = useState([]);
-
-  // const handleUploadImage = (e) => {
-  //   console.log("uploading here");
-  //   console.log(e.target);
-  // };
-
+  const [selectedImages, handleUploadImages] = useState([]);
+  const [url, setURL] = useState(null);
   const handleDragStart = (event, id) => {
     event.dataTransfer.setData("text/plain", id);
-    console.log(id);
+    console.log(id, "line 13");
+    const draggedImage = selectedImages.find((image) => image.key === id);
+    console.log(draggedImage, "line 15");
+    if (draggedImage) {
+      setURL(URL.createObjectURL(draggedImage));
+    }
   };
 
   const handleDragOver = (event, id) => {
     event.preventDefault();
+    // console.log(id, "line 19");
+    // console.log("in drag over line 18");
     setDraggedOverZone(id);
   };
 
   const handleDragLeave = () => {
+    // console.log("in drag leave line 23");
     setDraggedOverZone(null);
   };
 
@@ -31,36 +35,62 @@ function App() {
     const draggedId = event.dataTransfer.getData("text/plain");
     console.log(`Image ${draggedId} dropped into ${zoneId}`);
 
-    // Remove the image from the previous zone
-    const prevZoneId = Object.keys(imagesInZones).find((key) =>
-      imagesInZones[key]?.includes(draggedId)
-    );
-    if (prevZoneId) {
-      const updatedPrevZoneImages = imagesInZones[prevZoneId].filter(
-        (image) => image !== draggedId
-      );
+    // Find the dropped image from selectedImages
+    const droppedImage = selectedImages.find((image, key) => {
+      // console.log(image, "line 40");
+      // console.log(key, "line 41");
+      // console.log(draggedId, "line 41");
+      // console.log(key == draggedId);
+      // console.log(image.key, "line 42");
+      return key == draggedId;
+    });
+    // console.log(droppedImage, "dropped");
+    // Update imagesInZones with the dropped image
+
+    // Update selectedImages with the dropped image
+    if (droppedImage) {
       setImagesInZones((prevImages) => ({
         ...prevImages,
-        [prevZoneId]: updatedPrevZoneImages,
+        [zoneId]: [...(prevImages[zoneId] || []), droppedImage],
       }));
+      // console.log(droppedImage, "d");
+      // handleUploadImages((prevImages) => [...prevImages, droppedImage]);
     }
-
-    // Add the image to the new zone
-    setImagesInZones((prevImages) => ({
-      ...prevImages,
-      [zoneId]: [...(prevImages[zoneId] || []), draggedId],
-    }));
+    // Remove the dropped image from selectedImages
+    const updatedSelectedImages = selectedImages.filter(
+      (image) => image.key !== draggedId
+    );
+    handleUploadImages(updatedSelectedImages);
 
     setDraggedOverZone(null);
   };
 
-  const images = [
-    { id: 1, src: "../public/pug.jpg", alt: "Pug 1" },
-    { id: 2, src: "../public/pug.jpg", alt: "Pug 2" },
-    { id: 3, src: "../public/pug.jpg", alt: "Pug 3" },
-    { id: 4, src: "../public/pug.jpg", alt: "Pug 4" },
-    { id: 5, src: "../public/pug.jpg", alt: "Pug 5" },
-  ];
+  useEffect(() => {
+    // console.log(selectedImages, "neww");
+    // // setURL(URL.createObjectURL(selectedImages));
+    // console.log(url, "line 69");
+    console.log("Updated imagesInZones:", imagesInZones);
+    // console.log("Updated imagesInZones:", imagesInZones[dropZone.id]);
+  }, [selectedImages, url, imagesInZones]);
+  // const handleUploadImages = (uploadedImages) => {
+  //   console.log(selectedImages);
+  //   // Logic to handle uploaded images
+  //   console.log("Uploaded images:", uploadedImages);
+  //   // console.log(imagesInZones);
+  //   // setImagesInZones((prevImages) => ({
+  //   //   ...prevImages,
+  //   //   uploaded: [...prevImages, ...uploadedImages],
+  //   // }));
+  //   // You can further process or update state with the uploaded images here
+  // };
+
+  // const images = [
+  //   { id: 1, src: "../public/pug.jpg", alt: "Pug 1" },
+  //   { id: 2, src: "../public/pug.jpg", alt: "Pug 2" },
+  //   { id: 3, src: "../public/pug.jpg", alt: "Pug 3" },
+  //   { id: 4, src: "../public/pug.jpg", alt: "Pug 4" },
+  //   { id: 5, src: "../public/pug.jpg", alt: "Pug 5" },
+  // ];
 
   const dropZones = [
     { id: "god", title: "God" },
@@ -72,9 +102,15 @@ function App() {
 
   return (
     <>
-      <div className="upload mb-5 mt-8 p-4 flex">
-        <InputFileUpload />
-      </div>
+      <span className="text-3xl font-bold text-center text-slate-300">
+        Memeify – Where Imagination Becomes Memes!
+      </span>
+      {/* < className="upload mb-5 mt-8 p-4 flex"> */}
+      <InputFileUpload
+        handleDragStart={handleDragStart}
+        handleUploadImages={handleUploadImages}
+      />
+
       {/* <div className="upload mb-5 mt-8 p-4">
         <input
           type="file"
@@ -85,15 +121,6 @@ function App() {
           file:cursor-pointer"
         />
       </div> */}
-      <div className="container grid grid-cols-3">
-        {/* <span>img1</span>
-        <span>img1</span>
-        <span>img1</span>
-        <span>img1</span> */}
-      </div>
-      <span className="text-3xl font-bold text-center">
-        Memeify – Where Imagination Becomes Memes!
-      </span>
       <div className="categories space-y-4 mt-10 p-5">
         {dropZones.map((dropZone) => (
           <div
@@ -108,47 +135,44 @@ function App() {
           >
             <h2 className="text-xl font-bold">{dropZone.title}</h2>
             {imagesInZones[dropZone.id] &&
-              imagesInZones[dropZone.id].map((imageId) => (
-                <img
-                  key={imageId}
-                  width="150px"
-                  style={{ height: "150px", cursor: "pointer" }}
-                  src={
-                    images.find(
-                      (image) =>
-                        image.id === parseInt(imageId.split("image")[1])
-                    ).src
-                  }
-                  alt={
-                    images.find(
-                      (image) =>
-                        image.id === parseInt(imageId.split("image")[1])
-                    ).alt
-                  }
-                  className="dropped-image"
-                  draggable="true" // Make the dropped images draggable again
-                  onDragStart={(event) => handleDragStart(event, imageId)}
-                />
-              ))}
+              imagesInZones[dropZone.id].map((imageId, index) => {
+                console.log(imagesInZones[dropZone.id], "abc");
+                const imageUrl = URL.createObjectURL(imageId);
+                return (
+                  <img
+                    key={index}
+                    width="150px"
+                    style={{ height: "150px", cursor: "pointer" }}
+                    src={imageUrl}
+                    alt={`Preview ${index}`}
+                    className="dropped-image"
+                    draggable="true"
+                    onDragStart={(event) => handleDragStart(event, index)}
+                  />
+                );
+              })}
           </div>
         ))}
       </div>
-      <div className="images mt-10 grid grid-cols-4 gap-4 m-8 ">
-        {images.map((image) => (
-          <img
-            key={image.id}
-            width="150px"
-            style={{ height: "150px", cursor: "pointer" }}
-            src={image.src}
-            alt={image.alt}
-            id={`image${image.id}`}
-            className="draggable"
-            draggable="true"
-            loading="lazy"
-            onDragStart={(event) => handleDragStart(event, `image${image.id}`)}
-          />
-        ))}
-      </div>
+      {/* <div className="images mt-10 grid grid-cols-4 gap-4 m-8 ">
+        {selectedImages.length > 0 &&
+          selectedImages.map((image, index) => (
+            <img
+              key={index}
+              width="150px"
+              style={{ height: "150px", cursor: "pointer" }}
+              src={URL.createObjectURL(image)}
+              alt={`Preview ${index + 1}`}
+              // id={`image${image.id}`}
+              className="draggable"
+              draggable="true"
+              loading="lazy"
+              onDragStart={(event) =>
+                handleDragStart(event, `image${index + 1}`)
+              }
+            />
+          ))}
+      </div> */}
     </>
   );
 }
