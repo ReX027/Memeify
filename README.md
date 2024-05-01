@@ -4,7 +4,7 @@ Memeify is a web-based meme generator built using React, where users can create 
 
 ## Live Demo
 
-[https://memeify-kohl.vercel.app/](Memeify)
+(https://memeify-kohl.vercel.app/)[Memeify]
 
 ## Features
 
